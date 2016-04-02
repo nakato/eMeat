@@ -15,6 +15,7 @@ class StorageEngineSQ(object):
         try:
             self._cur.execute("CREATE TABLE attendees (name text, additional integer)")
             self._cur.execute("CREATE TABLE discription (title text, discription text)")
+            self._conn.commit()
         except:
             pass
 
@@ -22,6 +23,7 @@ class StorageEngineSQ(object):
         if isinstance(name, str) and isinstance(additional, int):
             try:
                 self._cur.execute("INSERT INTO attendees (name, additional) VALUES (?, ?);", (name, additional))
+                self._conn.commit()
             except:
                 raise StorageError
         else:
@@ -34,6 +36,7 @@ class StorageEngineSQ(object):
     def set_discription(self, title, data):
         try:
             self._cur.execute("INSERT INTO discription (title, discription) VALUES (?, ?);", (title, data))
+            self._conn.commit()
         except:
             raise StorageError
 
