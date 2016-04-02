@@ -1,0 +1,73 @@
+<html>
+<head>
+    <script src="//code.jquery.com/jquery-1.12.0.min.js"></script>
+<style>
+#attendees {
+	float: left;
+	width: 20%;
+	background-color: #CCF;
+}
+#body {
+	float: right;
+	width: 80%;
+	background-color: #FFA;
+}
+#signup {
+	padding-top: 30px;
+}
+</style>
+</head>
+<body>
+    <div id="attendees">
+        <table id="attendees">
+        </table>
+    </div>
+   
+    <div class="body">
+        <div id="details">
+        </div>
+        <div id="signup">
+            Name: <input type="text" name="name">
+            Plus: <select class=additions>
+                <option value=0>0</option>
+                <option value=1>1</option>
+                <option value=2>2</option>
+                <option value=3>3</option>
+                <option value=4>4</option>
+            </select>
+            <button id='submit'>Submit</button>
+        </div>
+    </div>
+    <script>
+        function updateAttendeeTable() {
+            $.ajax({url: 'api/get_attendees', type: 'GET', dataType: "json", success: _updateAttendeeTable});
+        }
+        function _updateAttendeeTable(data) {
+            var content = '<tr><td>Name</td><td>Plus</td></tr>';
+            jQuery.each(data, function(n, att) {
+                content += '<tr>';
+                content += '<td>' + n + '</td>';
+                content += '<td>' + att + '</td>';
+                content += '</tr>';
+            })
+            content += '</td>';
+            $("table#attendees").html(content);
+        }
+        function postAttendee() {
+            n = $("input").val()
+            att = parseInt($("select").val())
+            $.ajax({url: 'api/add_attendee', type: 'POST', dataType: "json", contentType: "application/json", processData: false, data: '{"attendee": "' + n + '", "additions": ' + att + '}'});
+        }
+        $("button").click(postAttendee)
+        $("button").click(updateAttendeeTable)
+        updateAttendeeTable()
+        function setupPage() {
+            $.ajax({url: 'api/get_discription', type: 'GET', dataType: "json",success: function (data) {
+                $(document).prop('title', data["title"]);
+                $("div#details").html(data["discription"]);
+            }});
+        }
+        setupPage()
+    </script>
+</body>
+</html>
