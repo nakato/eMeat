@@ -120,11 +120,14 @@ def max_body(limit):
     return hook
 
 
-class eMeat_GetAttendees:
+class DatabaseMixin(object):
 
     def __init__(self, db):
         self.db = db
-        self.logger = logging.getLogger('eMeat.' + __name__)
+        self.logger = logging.getLogger('eMeat.%s' % __name__)
+
+
+class eMeat_GetAttendees(DatabaseMixin):
 
     def on_get(self, req, resp):
         attendees = {}
@@ -133,11 +136,7 @@ class eMeat_GetAttendees:
         resp.body = json.dumps(attendees)
 
 
-class eMeat_AddAttendee:
-    def __init__(self, db):
-        self.db = db
-        self.logger = logging.getLogger('eMeat.' + __name__)
-
+class eMeat_AddAttendee(DatabaseMixin):
     @falcon.before(max_body(10 * 1024))
     def on_post(self, req, resp):
         try:
@@ -163,22 +162,15 @@ class eMeat_AddAttendee:
 
         resp.status = falcon.HTTP_201
 
-class eMeat_GetDescription:
 
-    def __init__(self, db):
-        self.db = db
-        self.logger = logging.getLogger('eMeat.' + __name__)
-
+class eMeat_GetDescription(DatabaseMixin):
     def on_get(self, req, resp):
         title, description = self.db.get_description()
         attendees = {"title": title ,"description": description}
         resp.body = json.dumps(attendees)
 
-class eMeat_SetDescription:
-    def __init__(self, db):
-        self.db = db
-        self.logger = logging.getLogger('eMeat.' + __name__)
 
+class eMeat_SetDescription(DatabaseMixin):
     @falcon.before(max_body(10 * 1024))
     def on_post(self, req, resp):
         try:
