@@ -36,15 +36,15 @@ angular.module('eMeatApp', []).controller('eMeatController', function($scope, $s
 
 
     eMeat.title = "Me no know";
-    eMeat.discription = "";
-    $scope.discription = $sce.trustAsHtml(eMeat.discription);
+    eMeat.description = "";
+    $scope.description = $sce.trustAsHtml(eMeat.description);
     eMeat.add_description = function() {
-        $http.get('api/get_discription').then(function(resp) {
+        $http.get('api/get_description').then(function(resp) {
             var title = resp.data.title;
-            var discription = resp.data.discription;
+            var description = resp.data.description;
             eMeat.title = title;
-            eMeat.discription = discription;
-            $scope.discription = $sce.trustAsHtml(eMeat.discription);
+            eMeat.description = description;
+            $scope.description = $sce.trustAsHtml(eMeat.description);
         });
     };
 

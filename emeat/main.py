@@ -14,7 +14,7 @@ class StorageEngineSQ(object):
         self._cur = self._conn.cursor()
         try:
             self._cur.execute("CREATE TABLE attendees (name text, additional integer)")
-            self._cur.execute("CREATE TABLE discription (title text, discription text)")
+            self._cur.execute("CREATE TABLE description (title text, description text)")
             self._conn.commit()
         except:
             pass
@@ -33,15 +33,15 @@ class StorageEngineSQ(object):
         for row in self._cur.execute("SELECT * FROM attendees ORDER BY name"):
             yield (row[0], row[1])
 
-    def set_discription(self, title, data):
+    def set_description(self, title, data):
         try:
-            self._cur.execute("INSERT INTO discription (title, discription) VALUES (?, ?);", (title, data))
+            self._cur.execute("INSERT INTO description (title, description) VALUES (?, ?);", (title, data))
             self._conn.commit()
         except:
             raise StorageError
 
-    def get_discription(self):
-        for row in self._cur.execute("SELECT * FROM discription"):
+    def get_description(self):
+        for row in self._cur.execute("SELECT * FROM description"):
             return (row[0], row[1])
 
 
@@ -163,18 +163,18 @@ class eMeat_AddAttendee:
 
         resp.status = falcon.HTTP_201
 
-class eMeat_GetDiscription:
+class eMeat_GetDescription:
 
     def __init__(self, db):
         self.db = db
         self.logger = logging.getLogger('eMeat.' + __name__)
 
     def on_get(self, req, resp):
-        title, discription = self.db.get_discription()
-        attendees = {"title": title ,"discription": discription}
+        title, description = self.db.get_description()
+        attendees = {"title": title ,"description": description}
         resp.body = json.dumps(attendees)
 
-class eMeat_SetDiscription:
+class eMeat_SetDescription:
     def __init__(self, db):
         self.db = db
         self.logger = logging.getLogger('eMeat.' + __name__)
@@ -197,8 +197,8 @@ class eMeat_SetDiscription:
 
         resp.status = falcon.HTTP_200
         title = doc['title']
-        discription = doc['data']
-        db.set_discription(title, discription)
+        description = doc['data']
+        db.set_description(title, description)
 
         resp.status = falcon.HTTP_201
 
@@ -211,12 +211,12 @@ app = falcon.API(middleware=[
 db = StorageEngineSQ('AusDayMeat.sqlite')
 eMeatGet = eMeat_GetAttendees(db)
 eMeatPut = eMeat_AddAttendee(db)
-eMeatSetDisc = eMeat_SetDiscription(db)
-eMeatGetDisc = eMeat_GetDiscription(db)
+eMeatSetDesc = eMeat_SetDescription(db)
+eMeatGetDesc = eMeat_GetDescription(db)
 app.add_route('/get_attendees', eMeatGet)
 app.add_route('/add_attendee', eMeatPut)
-app.add_route('/set_discription', eMeatSetDisc)
-app.add_route('/get_discription', eMeatGetDisc)
+app.add_route('/set_description', eMeatSetDesc)
+app.add_route('/get_description', eMeatGetDesc)
 
 if __name__ == '__main__':
     httpd = simple_server.make_server('127.0.0.1', 8000, app)
