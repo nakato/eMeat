@@ -1,31 +1,34 @@
 import json
 import logging
 import sqlite3
-import uuid
 from wsgiref import simple_server
 
 import falcon
 
 
 class StorageEngineSQ(object):
-    
+
     def __init__(self, path):
         self._conn = sqlite3.connect(path)
         self._cur = self._conn.cursor()
         try:
-            self._cur.execute("CREATE TABLE attendees (name text, additional integer)")
-            self._cur.execute("CREATE TABLE description (title text, description text)")
+            self._cur.execute(
+                "CREATE TABLE attendees (name text, additional integer)")
+            self._cur.execute(
+                "CREATE TABLE description (title text, description text)")
             self._conn.commit()
-        except:
+        except Exception:
             pass
 
     def add_attendee(self, name, additional):
         if isinstance(name, str) and isinstance(additional, int):
             try:
-                self._cur.execute("INSERT INTO attendees (name, additional) VALUES (?, ?);", (name, additional))
+                self._cur.execute(
+                    "INSERT INTO attendees (name, additional) VALUES (?, ?);",
+                    (name, additional))
                 self._conn.commit()
-            except:
-                raise StorageError
+            except Exception as e:
+                raise StorageError(e)
         else:
             raise ValueError
 
@@ -35,10 +38,12 @@ class StorageEngineSQ(object):
 
     def set_description(self, title, data):
         try:
-            self._cur.execute("INSERT INTO description (title, description) VALUES (?, ?);", (title, data))
+            self._cur.execute(
+                "INSERT INTO description (title, description) VALUES (?, ?);",
+                (title, data))
             self._conn.commit()
-        except:
-            raise StorageError
+        except Exception as e:
+            raise StorageError(e)
 
     def get_description(self):
         for row in self._cur.execute("SELECT * FROM description"):
@@ -105,7 +110,6 @@ class JSONTranslator(object):
         resp.body = json.dumps(req.context['result'])
 
 
-
 def max_body(limit):
 
     def hook(req, resp, resource, params):
@@ -166,7 +170,7 @@ class eMeat_AddAttendee(DatabaseMixin):
 class eMeat_GetDescription(DatabaseMixin):
     def on_get(self, req, resp):
         title, description = self.db.get_description()
-        attendees = {"title": title ,"description": description}
+        attendees = {"title": title, "description": description}
         resp.body = json.dumps(attendees)
 
 
