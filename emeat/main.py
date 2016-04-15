@@ -14,66 +14,12 @@
 
 import json
 import logging
-import sqlite3
 from wsgiref import simple_server
 
 import falcon
+from sqlalchemy.orm import sessionmaker
 
-
-class StorageEngineSQ(object):
-
-    def __init__(self, path):
-        self._conn = sqlite3.connect(path)
-        self._cur = self._conn.cursor()
-        try:
-            self._cur.execute(
-                "CREATE TABLE attendees (name text, additional integer)")
-            self._cur.execute(
-                "CREATE TABLE description (title text, description text)")
-            self._conn.commit()
-        except Exception:
-            pass
-
-    def add_attendee(self, name, additional):
-        if isinstance(name, str) and isinstance(additional, int):
-            try:
-                self._cur.execute(
-                    "INSERT INTO attendees (name, additional) VALUES (?, ?);",
-                    (name, additional))
-                self._conn.commit()
-            except Exception as e:
-                raise StorageError(e)
-        else:
-            raise ValueError
-
-    def get_attendees(self):
-        for row in self._cur.execute("SELECT * FROM attendees ORDER BY name"):
-            yield (row[0], row[1])
-
-    def set_description(self, title, data):
-        try:
-            self._cur.execute(
-                "INSERT INTO description (title, description) VALUES (?, ?);",
-                (title, data))
-            self._conn.commit()
-        except Exception as e:
-            raise StorageError(e)
-
-    def get_description(self):
-        for row in self._cur.execute("SELECT * FROM description"):
-            return (row[0], row[1])
-
-
-class StorageError(Exception):
-
-    @staticmethod
-    def handle(ex, req, resp, params):
-        description = ('Sorry, couldn\'t write your thing to the '
-                       'database. It worked on my box.')
-
-        raise falcon.HTTPError(falcon.HTTP_725,
-                               'Database Error',
-                               description)
+from emeat.db import models
 
 
 class RequireJSON(object):
@@ -140,17 +86,22 @@ def max_body(limit):
 
 class DatabaseMixin(object):
 
-    def __init__(self, db):
-        self.db = db
+    def __init__(self):
+        engine = models.db_connect()
+        self.Session = sessionmaker(bind=engine, autocommit=True)
         self.logger = logging.getLogger('eMeat.%s' % __name__)
 
 
 class eMeat_GetAttendees(DatabaseMixin):
 
     def on_get(self, req, resp):
+        session = self.Session()
+        db_attendees = session.query(models.attendees).all()
         attendees = {}
-        for name, adds in self.db.get_attendees():
-            attendees[name] = adds
+        for attendee in db_attendees:
+            di = attendee.to_dict()
+            name = di['name']
+            attendees[name] = di['additional']
         resp.body = json.dumps(attendees)
 
 
@@ -176,16 +127,22 @@ class eMeat_AddAttendee(DatabaseMixin):
         additions = doc['additions']
         if isinstance(additions, str):
             additions = int(additions)
-        self.db.add_attendee(attendee, additions)
+
+        session = self.Session()
+        obj = {'name': attendee, 'additional': additions}
+        attendee = models.attendees(**obj)
+        with session.begin():
+            session.add(attendee)
+        session.close()
 
         resp.status = falcon.HTTP_201
 
 
 class eMeat_GetDescription(DatabaseMixin):
     def on_get(self, req, resp):
-        title, description = self.db.get_description()
-        attendees = {"title": title, "description": description}
-        resp.body = json.dumps(attendees)
+        session = self.Session()
+        description = session.query(models.description).all()[0]
+        resp.body = json.dumps(description.to_dict())
 
 
 class eMeat_SetDescription(DatabaseMixin):
@@ -208,8 +165,12 @@ class eMeat_SetDescription(DatabaseMixin):
         resp.status = falcon.HTTP_200
         title = doc['title']
         description = doc['data']
-        self.db.set_description(title, description)
-
+        session = self.Session()
+        obj = {'title': title, 'description': description}
+        db_description = models.description(**obj)
+        with session.begin():
+            session.add(db_description)
+        session.close()
         resp.status = falcon.HTTP_201
 
 
@@ -219,11 +180,10 @@ def main():
         JSONTranslator(),
     ])
 
-    db = StorageEngineSQ('AusDayMeat.sqlite')
-    eMeatGet = eMeat_GetAttendees(db)
-    eMeatPut = eMeat_AddAttendee(db)
-    eMeatSetDesc = eMeat_SetDescription(db)
-    eMeatGetDesc = eMeat_GetDescription(db)
+    eMeatGet = eMeat_GetAttendees()
+    eMeatPut = eMeat_AddAttendee()
+    eMeatSetDesc = eMeat_SetDescription()
+    eMeatGetDesc = eMeat_GetDescription()
     application.add_route('/get_attendees', eMeatGet)
     application.add_route('/add_attendee', eMeatPut)
     application.add_route('/set_description', eMeatSetDesc)

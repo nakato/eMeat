@@ -1,6 +1,8 @@
 *.egg-info
 .tox
 *.sqlite
+*.db
 __pycache__
 .eggs
 ve
+*.swp
