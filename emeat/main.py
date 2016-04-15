@@ -199,21 +199,24 @@ class eMeat_SetDescription(DatabaseMixin):
         resp.status = falcon.HTTP_201
 
 
-app = falcon.API(middleware=[
-    RequireJSON(),
-    JSONTranslator(),
-])
+def main():
+    application = falcon.API(middleware=[
+        RequireJSON(),
+        JSONTranslator(),
+    ])
 
-db = StorageEngineSQ('AusDayMeat.sqlite')
-eMeatGet = eMeat_GetAttendees(db)
-eMeatPut = eMeat_AddAttendee(db)
-eMeatSetDesc = eMeat_SetDescription(db)
-eMeatGetDesc = eMeat_GetDescription(db)
-app.add_route('/get_attendees', eMeatGet)
-app.add_route('/add_attendee', eMeatPut)
-app.add_route('/set_description', eMeatSetDesc)
-app.add_route('/get_description', eMeatGetDesc)
+    db = StorageEngineSQ('AusDayMeat.sqlite')
+    eMeatGet = eMeat_GetAttendees(db)
+    eMeatPut = eMeat_AddAttendee(db)
+    eMeatSetDesc = eMeat_SetDescription(db)
+    eMeatGetDesc = eMeat_GetDescription(db)
+    application.add_route('/get_attendees', eMeatGet)
+    application.add_route('/add_attendee', eMeatPut)
+    application.add_route('/set_description', eMeatSetDesc)
+    application.add_route('/get_description', eMeatGetDesc)
+    return application
 
 if __name__ == '__main__':
+    app = main()
     httpd = simple_server.make_server('127.0.0.1', 8000, app)
     httpd.serve_forever()
