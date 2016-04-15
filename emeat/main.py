@@ -17,9 +17,8 @@ import logging
 from wsgiref import simple_server
 
 import falcon
-from sqlalchemy.orm import sessionmaker
 
-from emeat.db import models
+from emeat.controllers import event
 
 
 class RequireJSON(object):
@@ -45,8 +44,10 @@ class JSONTranslator(object):
         #
         # See also: PEP 3333
         if req.content_length in (None, 0):
-            # Nothing to do
-            return
+            if req.method in ('POST', 'PUT'):
+                raise falcon.HTTPBadRequest('A request body is required')
+            else:
+                return
 
         body = req.stream.read()
         if not body:
@@ -84,93 +85,45 @@ def max_body(limit):
     return hook
 
 
-class DatabaseMixin(object):
+class ControllerMixin(object):
 
     def __init__(self):
-        engine = models.db_connect()
-        self.Session = sessionmaker(bind=engine, autocommit=True)
+        self.event = event.Event()
         self.logger = logging.getLogger('eMeat.%s' % __name__)
 
 
-class eMeat_GetAttendees(DatabaseMixin):
+class eMeat_GetAttendees(ControllerMixin):
 
     def on_get(self, req, resp):
-        session = self.Session()
-        db_attendees = session.query(models.attendees).all()
-        attendees = {}
-        for attendee in db_attendees:
-            di = attendee.to_dict()
-            name = di['name']
-            attendees[name] = di['additional']
+        attendees = self.event.get_attendees()
         resp.body = json.dumps(attendees)
 
 
-class eMeat_AddAttendee(DatabaseMixin):
+class eMeat_AddAttendee(ControllerMixin):
     @falcon.before(max_body(10 * 1024))
     def on_post(self, req, resp):
-        try:
-            doc = req.context['doc']
-        except Exception as ex:
-            self.logger.error(ex)
-
-            description = ('Aliens have attacked our base! We will '
-                           'be back as soon as we fight them off. '
-                           'We appreciate your patience.')
-
-            raise falcon.HTTPServiceUnavailable(
-                'Service Outage',
-                description,
-                30)
-
-        resp.status = falcon.HTTP_200
+        doc = req.context['doc']
         attendee = doc['attendee']
         additions = doc['additions']
         if isinstance(additions, str):
             additions = int(additions)
-
-        session = self.Session()
-        obj = {'name': attendee, 'additional': additions}
-        attendee = models.attendees(**obj)
-        with session.begin():
-            session.add(attendee)
-        session.close()
-
+        self.event.add_attendee(attendee, additions)
         resp.status = falcon.HTTP_201
 
 
-class eMeat_GetDescription(DatabaseMixin):
+class eMeat_GetDescription(ControllerMixin):
     def on_get(self, req, resp):
-        session = self.Session()
-        description = session.query(models.description).all()[0]
-        resp.body = json.dumps(description.to_dict())
+        description = self.event.get_description()
+        resp.body = json.dumps(description)
 
 
-class eMeat_SetDescription(DatabaseMixin):
+class eMeat_SetDescription(ControllerMixin):
     @falcon.before(max_body(10 * 1024))
     def on_post(self, req, resp):
-        try:
-            doc = req.context['doc']
-        except Exception as ex:
-            self.logger.error(ex)
-
-            description = ('Aliens have attacked our base! We will '
-                           'be back as soon as we fight them off. '
-                           'We appreciate your patience.')
-
-            raise falcon.HTTPServiceUnavailable(
-                'Service Outage',
-                description,
-                30)
-
-        resp.status = falcon.HTTP_200
+        doc = req.context['doc']
         title = doc['title']
         description = doc['data']
-        session = self.Session()
-        obj = {'title': title, 'description': description}
-        db_description = models.description(**obj)
-        with session.begin():
-            session.add(db_description)
-        session.close()
+        self.event.set_description(title, description)
         resp.status = falcon.HTTP_201
 
 
@@ -189,8 +142,3 @@ def main():
     application.add_route('/set_description', eMeatSetDesc)
     application.add_route('/get_description', eMeatGetDesc)
     return application
-
-if __name__ == '__main__':
-    app = main()
-    httpd = simple_server.make_server('127.0.0.1', 8000, app)
-    httpd.serve_forever()
