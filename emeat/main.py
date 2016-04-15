@@ -14,7 +14,6 @@
 
 import json
 import logging
-from wsgiref import simple_server
 
 import falcon
 
