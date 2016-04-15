@@ -94,8 +94,7 @@ class ControllerMixin(object):
 class eMeat_GetAttendees(ControllerMixin):
 
     def on_get(self, req, resp):
-        attendees = self.event.get_attendees()
-        resp.body = json.dumps(attendees)
+        req.context['result'] = self.event.get_attendees()
 
 
 class eMeat_AddAttendee(ControllerMixin):
@@ -112,8 +111,7 @@ class eMeat_AddAttendee(ControllerMixin):
 
 class eMeat_GetDescription(ControllerMixin):
     def on_get(self, req, resp):
-        description = self.event.get_description()
-        resp.body = json.dumps(description)
+        req.context['result'] = self.event.get_description()
 
 
 class eMeat_SetDescription(ControllerMixin):
