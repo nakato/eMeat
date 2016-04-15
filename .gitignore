@@ -2,3 +2,5 @@
 .tox
 *.sqlite
 __pycache__
+.eggs
+ve
