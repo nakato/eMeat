@@ -12,14 +12,18 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from oslo_config import cfg
 from sqlalchemy import *  # noqa
 from sqlalchemy.ext.declarative import declarative_base
 
 DeclarativeBase = declarative_base()
+metadata = DeclarativeBase.metadata
+
+CONF = cfg.CONF
 
 
 def db_connect():
-    return create_engine("sqlite:///AusDayMeat.db")
+    return create_engine(CONF.database.uri)
 
 
 class attendees(DeclarativeBase):

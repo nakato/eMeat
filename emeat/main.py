@@ -17,6 +17,7 @@ import logging
 
 import falcon
 
+from emeat import conf
 from emeat.controllers import event
 
 
@@ -86,8 +87,8 @@ def max_body(limit):
 
 class ControllerMixin(object):
 
-    def __init__(self):
-        self.event = event.Event()
+    def __init__(self, db_controll):
+        self.event = db_controll
         self.logger = logging.getLogger('eMeat.%s' % __name__)
 
 
@@ -130,10 +131,12 @@ def main():
         JSONTranslator(),
     ])
 
-    eMeatGet = eMeat_GetAttendees()
-    eMeatPut = eMeat_AddAttendee()
-    eMeatSetDesc = eMeat_SetDescription()
-    eMeatGetDesc = eMeat_GetDescription()
+    db_controll = event.Event()
+
+    eMeatGet = eMeat_GetAttendees(db_controll)
+    eMeatPut = eMeat_AddAttendee(db_controll)
+    eMeatSetDesc = eMeat_SetDescription(db_controll)
+    eMeatGetDesc = eMeat_GetDescription(db_controll)
     application.add_route('/get_attendees', eMeatGet)
     application.add_route('/add_attendee', eMeatPut)
     application.add_route('/set_description', eMeatSetDesc)
