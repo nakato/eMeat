@@ -86,8 +86,8 @@ def max_body(limit):
 
 class ControllerMixin(object):
 
-    def __init__(self, db_controll):
-        self.event = db_controll
+    def __init__(self, db_control):
+        self.event = db_control
         self.logger = logging.getLogger('eMeat.%s' % __name__)
 
 
@@ -130,12 +130,12 @@ def main():
         JSONTranslator(),
     ])
 
-    db_controll = event.Event()
+    db_control = event.Event()
 
-    eMeatGet = eMeat_GetAttendees(db_controll)
-    eMeatPut = eMeat_AddAttendee(db_controll)
-    eMeatSetDesc = eMeat_SetDescription(db_controll)
-    eMeatGetDesc = eMeat_GetDescription(db_controll)
+    eMeatGet = eMeat_GetAttendees(db_control)
+    eMeatPut = eMeat_AddAttendee(db_control)
+    eMeatSetDesc = eMeat_SetDescription(db_control)
+    eMeatGetDesc = eMeat_GetDescription(db_control)
     application.add_route('/get_attendees', eMeatGet)
     application.add_route('/add_attendee', eMeatPut)
     application.add_route('/set_description', eMeatSetDesc)
