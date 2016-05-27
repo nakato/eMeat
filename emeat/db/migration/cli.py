@@ -5,12 +5,14 @@ from alembic.config import Config
 
 from emeat import conf
 
-
-def main():
+def main(args = None):
     path = os.path.dirname(__file__)
     ini_path = os.path.join(path, 'alembic.ini')
     cl = CommandLine()
-    opts = cl.parser.parse_args()
+    if args:
+        opts = cl.parser.parse_args(args)
+    else:
+        opts = cl.parser.parse_args()
     if not hasattr(opts, "cmd"):
         cl.parser.error("too few arguments")
     alembic_config = Config(ini_path, cmd_opts=opts)
