@@ -1,4 +1,4 @@
-falcon>=0.0.0rc
+falcon
 sqlalchemy
 alembic
 oslo.db
