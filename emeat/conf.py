@@ -12,12 +12,26 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from oslo_config import cfg
+import json
+import os
+import sys
+import types
 
-emeat_opts = [
-    cfg.StrOpt('uri', default="", help="SQLAlchemy/Alembic database URI")
+paths = [
+    "%s/emeat.json" % os.getcwd(),
+    os.path.expanduser("~/.emeat/emeat.json"),
+    "/etc/emeat/emeat.json",
 ]
 
-CONF = cfg.CONF
-CONF(project='emeat')
-CONF.register_opts(emeat_opts, 'database')
+_config_dict = None
+
+# Todo, overlay configs.  Directory > Home > Sys
+for path in paths:
+    if os.path.isfile(path):
+        with open(path, 'r') as f:
+            _config_dict = json.loads(f.read())
+        break
+
+config = types.MappingProxyType(_config_dict)
+
+sys.modules[__name__] = config

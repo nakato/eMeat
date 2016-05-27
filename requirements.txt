@@ -1,5 +1,4 @@
 falcon>=0.0.0rc
 sqlalchemy
 alembic
-oslo.config
 oslo.db

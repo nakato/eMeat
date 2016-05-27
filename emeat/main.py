@@ -17,7 +17,6 @@ import logging
 
 import falcon
 
-from emeat import conf
 from emeat.controllers import event
 
 
