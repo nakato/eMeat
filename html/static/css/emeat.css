@@ -1,0 +1,14 @@
+body {
+    padding-top: 60px;
+    padding-bottom: 40px;
+}
+
+.col-md-4 {
+    border-radius: 6px;
+    background-color: #eee
+}
+
+.col-md-7 {
+    border-radius: 6px;
+    background-color: #ddd
+}

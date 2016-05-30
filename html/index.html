@@ -1,36 +1,69 @@
 <html ng-app="eMeatApp" ng-controller="eMeatController as eMeat">
     <head>
         <title>{{eMeat.title}}</title>
-        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular.min.js"></script>
-        <script src="meat.js"></script>
-        <link rel="stylesheet" href="emeat.css">
+        <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+        <link href="/static/css/bootstrap-theme.min.css" rel="stylesheet">
+        <link href="/static/css/emeat.css" rel="stylesheet">
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular.min.js" type="text/javascript"></script>
+        <script src="/static/js/emeat.js" type="text/javascript"></script>
+        <script src="/static/js/jquery-2.2.3.min.js" type="text/javascript"></script>
+        <script src="/static/js/bootstrap.min.js" type="text/javascript"></script>
     </head>
-    <body>
-        <div id="attendees">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Plus</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr ng-repeat="attendee in eMeat.attendees | orderBy: 'name'">
-                        <td>{{attendee.name}}</td>
-                        <td>{{attendee.pluss}}</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        <div class="body">
-            <div id='details' ng-bind-html="description">
+    <body role="document">
+        <nav class="navbar navbar-inverse navbar-fixed-top">
+            <div class="container">
+                <div class="navbar-header">
+                    <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="/">eMeat</a>
+                </div>
+
+                <div class="navbar-collapse collapse" id="navbar">
+                    <ul class="nav navbar-nav">
+                        <li class="active">
+                            <a href="/">Home</a></li>
+                    </ul>
+                </div>
             </div>
-            <div id='signup'>
-                <form ng-submit="eMeat.addAttendee()">
-                    Name: <input type="text" ng-model="eMeat.attName" name="name" placeholder="Name">
-                    Plus: <select class=additions ng-model="eMeat.attPluss" ng-options="adds.name for adds in eMeat.availableAdds track by adds.id"></select>
-                    <input class="btn-primary" type="submit" value="Submit">
-                </form>
+        </nav>
+
+        <div class="container">
+            <div class="jumbotron">
+                <div id='details' ng-bind-html="description">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <div id="attendees">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Plus</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="attendee in eMeat.attendees | orderBy: 'name'">
+                                    <td>{{attendee.name}}</td>
+                                    <td>{{attendee.pluss}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="col-md-7 col-md-offset-1">
+                    <div id='signup'>
+                        <form ng-submit="eMeat.addAttendee()">
+                            Name: <input type="text" ng-model="eMeat.attName" name="name" placeholder="Name">
+                            Plus: <select class=additions ng-model="eMeat.attPluss" ng-options="adds.name for adds in eMeat.availableAdds track by adds.id"></select>
+                            <input class="btn-primary" type="submit" value="Submit">
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
     </body>
