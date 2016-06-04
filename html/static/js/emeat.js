@@ -23,7 +23,6 @@ angular.module('eMeatApp', []).controller('eMeatController', function($scope, $s
                 eMeat.attendee_count += v;
             });
         });
-        console.log("Attendee count: " + eMeat.attendee_count)
     }
 
     $scope.refresh();
