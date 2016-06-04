@@ -12,3 +12,9 @@ body {
     border-radius: 6px;
     background-color: #ddd
 }
+tfoot, thead {
+    background-color: #ddd
+}
+tbody {
+    background-color: #ccc
+}

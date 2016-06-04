@@ -14,12 +14,16 @@ angular.module('eMeatApp', []).controller('eMeatController', function($scope, $s
 
     $scope.refresh = function() {
         eMeat.attendees = [];
+        eMeat.attendee_count = 0;
         $http.get('api/get_attendees').then(function(response) {
             var rsp = response.data;
+            eMeat.attendee_count = Object.keys(rsp).length;
             angular.forEach(rsp, function(v, k) {
                 eMeat.attendees.push({name: k, pluss: v});
+                eMeat.attendee_count += v;
             });
         });
+        console.log("Attendee count: " + eMeat.attendee_count)
     }
 
     $scope.refresh();
