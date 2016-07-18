@@ -17,6 +17,7 @@ import json
 import os
 import sys
 
+
 class config(collections.Mapping):
 
     def _read_config(self):
@@ -37,7 +38,7 @@ class config(collections.Mapping):
     def __init__(self):
         self._config = json.loads(self._read_config())
 
-    def __getitem__(self, key): 
+    def __getitem__(self, key):
         return self._config[key]
 
     def __len__(self):

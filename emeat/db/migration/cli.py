@@ -5,7 +5,8 @@ from alembic.config import Config
 
 from emeat import conf
 
-def main(args = None):
+
+def main(args=None):
     path = os.path.dirname(__file__)
     ini_path = os.path.join(path, 'alembic.ini')
     cl = CommandLine()
